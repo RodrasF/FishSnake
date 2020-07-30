@@ -1,0 +1,2 @@
+obfuscator: javascript-obfuscator js --output public --config obfuscator-config.json
+host: firebase serve --only hosting
