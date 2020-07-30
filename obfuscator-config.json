@@ -3,7 +3,7 @@
     "controlFlowFlattening": false,
     "deadCodeInjection": true,
     "debugProtection": true,
-    "disableConsoleOutput": true,
+    "disableConsoleOutput": false,
     "identifierNamesGenerator": "hexadecimal",
     "identifiersPrefix": "",
     "log": false,

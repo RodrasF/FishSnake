@@ -1,8 +1,12 @@
 var game =  function (p) {
-  p.rez = 45;
-  p.running = false;
-  p.score = 0;
-  p.golden = false;
+
+  let blockedWords = ["anal","anus","arse","ass","ballsack","bitch","biatch","bloody","blowjob","blow job","boner","boob","buttplug","clitoris","cock","cunt","dick","dildo","dyke","fag","fuck","f u c k","nigger","nigga","nagga","nagger","neeger","penis","piss","poop","pussy","scrotum","slut","smegma","spunk","vagina","whore","retarded","retard","kkk"];
+  let cacheKey = "fish-snake-name";
+
+  let rez = 45;
+  let running = false;
+  let score = 0;
+  let golden = false;
   p.fish = [];
 
   p.preload = function() {
@@ -14,29 +18,37 @@ var game =  function (p) {
     p.gameOverSound.setVolume(0.1);
 
     p.foodImg = p.loadImage('assets/heart.png');
-    p.goldenFoodImg = p.loadImage('assets/golden_heart.png');
+    goldenFoodImg = p.loadImage('assets/golden_heart.png');
 
-    p.name = p.getItem("fish-snake-name");
+    let cachedName = p.getItem(cacheKey);
+    if(invalidName(cachedName)) {
+      p.name = "";
+      removeItem(cacheKey);
+    } else {
+      p.name = cachedName;
+    }
+
   }
 
   p.setup = function() {
-    p.createCanvas(p.windowWidth, p.windowHeight).parent('canvas');
+    p.createCanvas(window.innerWidth, window.innerHeight).parent('canvas');
 
     p.canvas = document.getElementById("canvas");
     p.menu = document.getElementById("main-menu");
     p.nameInput = document.getElementById("name");
     p.leaderboard = document.getElementById("leaderboard");
-    p.scoreLabel = document.getElementById("score");
+    scoreLabel = document.getElementById("score");
     p.highscoreLabel = document.getElementById("highscore");
     p.highscoreLabel.style.display = 'none';
 
     p.nameInput.value = p.name;
     document.getElementById("play-button").onclick = play;
+    document.getElementById("save").onclick = saveName;
     document.getElementById("back-leaderboard").onclick = showMenu;
     document.getElementById("leaderboard-button").onclick = showLeaderboard;
 
-    p.w = p.floor(p.windowWidth / p.rez);
-    p.h = p.floor(p.windowHeight / p.rez);
+    p.w = p.floor(window.innerWidth / rez);
+    p.h = p.floor(window.innerHeight / rez);
     p.frameRate(13);
 
     p.LEFT = p.createVector(-1, 0);
@@ -48,9 +60,9 @@ var game =  function (p) {
   }
 
   p.windowResized = function() {
-    p.resizeCanvas(p.windowWidth, p.windowHeight);
-    p.w = p.floor(p.windowWidth / p.rez);
-    p.h = p.floor(p.windowHeight / p.rez);
+    p.resizeCanvas(window.innerWidth, window.innerHeight);
+    p.w = p.floor(window.innerWidth / rez);
+    p.h = p.floor(window.innerHeight / rez);
   }
 
   p.keyPressed = function() {
@@ -68,10 +80,10 @@ var game =  function (p) {
   }
 
   p.draw = function() {
-    p.scale(p.rez);
+    p.scale(rez);
     p.background(245);
 
-    if(p.running) {
+    if(running) {
       showGame()
     } else {
       showMenu()
@@ -85,16 +97,31 @@ var game =  function (p) {
     p.menu.style.display = "";
   }
 
+  function saveName() {
+    if(invalidName(p.nameInput.value)) {
+      alert("Insert a valid Name with 3 or more characters!");
+      p.name = undefined;
+      return;
+    }
+
+    p.name = p.nameInput.value;
+    p.storeItem("fish-snake-name", p.name);
+    alert("Name Saved!");
+  }
+
+  function invalidName(n) {
+    return n == undefined || n.length < 3 || blockedWords.some(word => n.toLowerCase().includes(word));
+  }
+
   function play() {
-    if(p.nameInput.value.length < 3) {
+    if(!p.name) {
       alert("Insert a valid Name with 3 or more characters!");
       showMenu();
       return;
     }
 
-    p.storeItem("fish-snake-name", p.nameInput.value);
     p.snake = new Snake(p);
-    p.score = 0;
+    score = 0;
     p.dir = p.STOPPED;
     foodLocation();
 
@@ -102,32 +129,32 @@ var game =  function (p) {
     p.menu.style.display = "none";
     p.leaderboard.style.display = "none";
     p.canvas.style.display = "";
-    p.scoreLabel.innerText = 0;
-    p.running = true;
+    scoreLabel.innerText = 0;
+    running = true;
     p.loop();
   }
 
   function showGame() {
-    if (p.snake.eat(p.food, p.golden)) {
-      p.golden = false;
-      p.score++;
-      p.scoreLabel.innerText = p.score;
+    if (p.snake.eat(p.food, golden)) {
+      golden = false;
+      score++;
+      scoreLabel.innerText = score;
       p.eatSound.play();
       if (lucky()) {
-        p.golden = true;
+        golden = true;
       }
       foodLocation();
     }
     
 
-    p.image(p.golden? p.goldenFoodImg : p.foodImg, p.food.x, p.food.y, 1, 1);
+    p.image(golden? goldenFoodImg : p.foodImg, p.food.x, p.food.y, 1, 1);
     p.snake.update(p.dir);
     p.snake.show();
 
     if (p.snake.endGame()) {
       p.gameOverSound.play();
-      p.running = false;
-      if( p.score > 0 ) {
+      running = false;
+      if( score > 0 ) {
         checkLeaderboard();
       }
     }
@@ -166,7 +193,7 @@ var game =  function (p) {
       addScore();
     } else {
       const lastScore = scores[scores.length-1];
-      if(lastScore.get("score") < p.score) {
+      if(lastScore.get("score") < score) {
         updateScore(lastScore.id);
       }
     }
@@ -182,8 +209,8 @@ var game =  function (p) {
 
   function addScore() {
     firebase.firestore().collection('leaderboard').add({
-      name: p.nameInput.value,
-      score: p.score
+      name: p.name,
+      score: score
     })
     .then(function(docRef) {
         console.log("Score added with Success!");
@@ -196,8 +223,8 @@ var game =  function (p) {
 
   function updateScore(scoreId) {
     firebase.firestore().collection('leaderboard').doc(scoreId).update({
-      name: p.nameInput.value,
-      score: p.score
+      name: p.name,
+      score: score
     })
     .then(function() {
         console.log("Score successfully replaced!");

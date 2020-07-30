@@ -8,8 +8,11 @@
 }
 
 * {
-  font-family: 'pixeledregular';
   text-align: center;
+}
+
+h1,h2,h3,h4,input,label,li {
+  font-family: 'pixeledregular';
 }
 
 html,
@@ -49,10 +52,10 @@ canvas {
 }
 
 button {
-  padding: 0;
   border: none;
   background: none;
   outline:none;
+  font-size: 2em;
 }
 
 button:hover {
