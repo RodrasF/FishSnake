@@ -8,6 +8,7 @@
     <script src="vendor/p5.dom.min.js"></script>
     <script src="vendor/p5.sound.min.js"></script>
     <script src="vendor/ml5.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8">
   </head>
@@ -19,13 +20,21 @@
     <div class="center" id="main-menu">
       <h1>Fish Snake</h1>
       <img src="assets/fish/cool_left.png" width="100" height="100">
-      <h3 id="highscore"></h3>
+
+      <h3 id="highscore" class="highscore">NEW HIGHSCORE!</h3>
+
+      <div class="form">
+        <label for="name">Your name:</label>
+        <input type="text" id="name" name="name">
+      </div>
+
       <button id="play-button"><img src="assets/play.png" width="100" height="100"></button>
       <button id="leaderboard-button"><img src="assets/leaderboard.png" width="100" height="100"></button>
       <h4>(press space to start/restart)</h4>
     </div>
 
     <div class="center" id="leaderboard">
+      <button id="back-leaderboard"><i class="fa fa-arrow-left"></i></button>
       <h1>Leaderboard</h1>
       <ol id="leaderboard-list">
       </ol>
@@ -35,7 +44,7 @@
     <script src="/__/firebase/7.17.1/firebase-app.js"></script>
     <!-- SDKs for Firebase products that you want to use https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="/__/firebase/7.17.1/firebase-analytics.js"></script>
-    <script src="/__/firebase/7.17.1/firebase-database.js"></script>
+    <script src="/__/firebase/7.17.1/firebase-firestore.js"></script>
     <!-- Initialize Firebase -->
     <script src="/__/firebase/init.js"></script>
 

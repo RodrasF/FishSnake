@@ -27,6 +27,14 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.form {
+  padding-bottom: 5%;
+}
+
+.highscore {
+  color: blue;
+}
+
 canvas {
   position: absolute;
   left:0%;

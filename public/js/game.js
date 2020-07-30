@@ -4,6 +4,7 @@ let h;
 
 let canvas;
 let menu;
+let nameBox;
 let leaderboard;
 let scoreLabel;
 let highscoreLabel;
@@ -23,7 +24,8 @@ let STOPPED;
 
 let running = false;
 let score = 0;
-let highScore;
+let name;
+let newHighscore = false;
 
 let snake;
 let food;
@@ -40,8 +42,8 @@ function preload() {
 
   foodImg = loadImage('assets/heart.png');
   goldenFoodImg = loadImage('assets/golden_heart.png');
-  
-  highScore = getItem("fish_highscore");
+
+  name = getItem("fish-snake-name");
 }
 
 function setup() {
@@ -49,11 +51,15 @@ function setup() {
 
   canvas = document.getElementById("canvas");
   menu = document.getElementById("main-menu");
+  nameInput = document.getElementById("name");
   leaderboard = document.getElementById("leaderboard");
   scoreLabel = document.getElementById("score");
   highscoreLabel = document.getElementById("highscore");
-  highscoreLabel.innerText = `Your Highscore: ${highScore}`;
+  highscoreLabel.style.display = 'none';
+
+  nameInput.value = name;
   document.getElementById("play-button").onclick = play;
+  document.getElementById("back-leaderboard").onclick = showMenu;
   document.getElementById("leaderboard-button").onclick = showLeaderboard;
 
   w = floor(width / rez);
@@ -86,19 +92,6 @@ function keyPressed() {
   }
 }
 
-function play() {
-  snake = new Snake();
-  score = 0;
-  dir = STOPPED;
-  foodLocation();
-
-  menu.style.display = "none";
-  canvas.style.display = "";
-  scoreLabel.innerText = 0;
-  running = true;
-  loop();
-}
-
 function draw() {
   scale(rez);
   background(245);
@@ -117,15 +110,26 @@ function showMenu() {
   menu.style.display = "";
 }
 
-function showLeaderboard() {
+function play() {
+  if(nameInput.value.length < 3) {
+    alert("Insert a valid Name with 3 or more characters!");
+    showMenu();
+    return;
+  }
+
+  storeItem("fish-snake-name", nameInput.value);
+  snake = new Snake();
+  score = 0;
+  dir = STOPPED;
+  foodLocation();
+
+  highscoreLabel.style.display = 'none';
   menu.style.display = "none";
-  leaderboard.style.display = "";
-
-  const scores = [{name:"Ana",score:50}, {name:"Rodrigo",score:60}, {name:"Bambi",score:30}];
-  scores.sort((s1, s2) => s2.score - s1.score);
-
-  const listItems = scores.map( (element) => `<li class='list-item'>${element.name} - ${element.score}</li>`);
-  document.getElementById("leaderboard-list").innerHTML = listItems.join('');
+  leaderboard.style.display = "none";
+  canvas.style.display = "";
+  scoreLabel.innerText = 0;
+  running = true;
+  loop();
 }
 
 function showGame() {
@@ -146,12 +150,11 @@ function showGame() {
   snake.show();
 
   if (snake.endGame()) {
-    if(score > highScore) {
-      highScore = score;
-      storeItem("fish_highscore", highScore);
-    }
     gameOverSound.play();
     running = false;
+    if( score > 0 ) {
+      checkLeaderboard();
+    }
   }
 }
 
@@ -164,4 +167,69 @@ function foodLocation() {
 function lucky() {
   let luckyNumber = random(100);
   return luckyNumber <= 1;
+}
+
+function showLeaderboard() {
+  menu.style.display = "none";
+  leaderboard.style.display = "";
+  let list = document.getElementById("leaderboard-list");
+
+  getScores()
+    .then( docs =>
+      docs.map( doc =>
+        `<li class='list-item'>${doc.get("name")} - ${doc.get("score")}</li>`
+      )
+    )
+    .then( items => 
+      list.innerHTML = items.join('')
+    );
+}
+
+async function checkLeaderboard() {
+  const scores = await getScores();
+  if ( scores.length < 10) {
+    addScore();
+  } else {
+    const lastScore = scores[scores.length-1];
+    if(lastScore.get("score") < score) {
+      updateScore(lastScore.id);
+    }
+  }
+}
+
+function getScores() {
+  return firebase.firestore().collection('leaderboard')
+    .orderBy('score', 'desc')
+    .limit(10)
+    .get()
+    .then(querySnapshot =>querySnapshot.docs);
+}
+
+function addScore() {
+  firebase.firestore().collection('leaderboard').add({
+    name: nameInput.value,
+    score: score
+  })
+  .then(function(docRef) {
+      console.log("Score added with Success!");
+      highscoreLabel.style.display = '';
+  })
+  .catch(function(error) {
+      console.error("Error adding Score: ", error);
+  })
+}
+
+function updateScore(scoreId) {
+  firebase.firestore().collection('leaderboard').doc(scoreId).update({
+    name: nameInput.value,
+    score: score
+  })
+  .then(function() {
+      console.log("Score successfully replaced!");
+      highscoreLabel.style.display = '';
+  })
+  .catch(function(error) {
+      // The document probably doesn't exist.
+      console.error("Error replacing Score: ", error);
+  });
 }
