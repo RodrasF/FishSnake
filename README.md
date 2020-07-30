@@ -1,2 +1,2 @@
 # FishSnake
- The Sanke game but with Fish! Inspired by twitch.tv/yourmotherisafish
+ The Snake game but with Fish! Inspired by [yourmotherisfish's Stream](https://www.twitch.tv/yourmotherisafish)
