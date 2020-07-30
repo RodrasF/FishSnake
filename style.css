@@ -1,0 +1,67 @@
+@font-face {
+  font-family: 'pixeledregular';
+  src: url('assets/fonts/pixeled-webfont.woff2') format('woff2'),
+       url('assets/fonts/pixeled-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+* {
+  font-family: 'pixeledregular';
+  text-align: center;
+}
+
+html,
+body {
+  overflow: hidden;
+  margin: 0;
+  height: 100%;
+  position: relative;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+canvas {
+  position: absolute;
+  left:0%;
+  cursor: none;
+}
+
+#score {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 0;
+  border: none;
+  background: none;
+  outline:none;
+}
+
+button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+ol {
+  list-style: none;
+  counter-reset: ranking-counter;
+  padding: 0;
+  margin: 0;
+}
+ol li {
+  counter-increment: ranking-counter;
+}
+ol li::before {
+  content: counter(ranking-counter) ". ";
+  color:blue;
+  font-weight: bold;
+}
