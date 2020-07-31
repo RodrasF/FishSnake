@@ -5,3 +5,4 @@
 * [ ] Increase the speed the more points you get
 * [ ] Make a 1v1 game mode with split screen (similar to Tetris)
 * [ ] Add Dark Mode
+* [ ] Random Fish
